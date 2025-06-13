@@ -42,3 +42,18 @@ def category_list(request, category_slug):
     listings = Listing.objects.filter(category=category).order_by('-created_at')
     categories = Category.objects.all()
     return render(request, 'listings/category.html', {'listings': listings, 'category': category, 'categories': categories})
+
+
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # сразу логиним пользователя после регистрации
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})

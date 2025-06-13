@@ -40,12 +40,19 @@
   </style>
 </head>
 <body>
-  <header class="d-flex justify-content-between align-items-center p-3 bg-light">
-    <div><strong>Mostishuka</strong></div>
-    <div>
-      <a href="{% url 'add_listing' %}" class="btn btn-success btn-round">+</a>
-    </div>
-  </header>
+ <header class="d-flex justify-content-between align-items-center p-3 bg-light">
+  <div><strong>Mostishuka</strong></div>
+  <div>
+    {% if user.is_authenticated %}
+      <span class="me-3">Привет, {{ user.username }}!</span>
+      <a href="{% url 'logout' %}" class="btn btn-outline-secondary">Выйти</a>
+      <a href="{% url 'add_listing' %}" class="btn btn-success btn-round ms-2">+</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="btn btn-primary me-2">Войти</a>
+      <a href="{% url 'register' %}" class="btn btn-secondary">Регистрация</a>
+    {% endif %}
+  </div>
+</header>
 
   <div class="container mt-3">
     <div class="row text-center mb-4">
