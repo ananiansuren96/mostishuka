@@ -2,10 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-from .models import Listing, Category
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+
+from django.db.models import Q
+
+from .models import Listing, Category, Message
+
 
 def home(request):
     all_listings = Listing.objects.all().order_by('-created_at')
@@ -40,12 +46,12 @@ def add_listing(request):
         return redirect('login')  # или куда у тебя логин
 
     if request.method == 'POST':
-        title = request.POST['title']
-        description = request.POST['description']
-        price = request.POST['price']
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        price = request.POST.get('price')
         image = request.FILES.get('image')
-        category_id = request.POST['category']
-        contact_phone = request.POST['contact_phone']
+        category_id = request.POST.get('category')
+        contact_phone = request.POST.get('contact_phone')
 
         category = get_object_or_404(Category, id=category_id)
         Listing.objects.create(
@@ -85,3 +91,56 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
+
+
+@login_required
+def conversations_list(request):
+    user = request.user
+    conversations = Message.objects.filter(Q(sender=user) | Q(recipient=user)).order_by('-timestamp')
+
+    interlocutors = {}
+    for msg in conversations:
+        if msg.sender == user:
+            other = msg.recipient
+        else:
+            other = msg.sender
+        if other.id not in interlocutors:
+            interlocutors[other.id] = msg
+
+    return render(request, 'listings/conversations_list.html', {
+        'interlocutors': interlocutors.values(),
+    })
+
+
+@login_required
+def conversation_detail(request, user_id):
+    user = request.user
+    other = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        if text:
+            listing_id = request.POST.get('listing_id')
+            listing = get_object_or_404(Listing, id=listing_id) if listing_id else None
+            Message.objects.create(sender=user, recipient=other, text=text, listing=listing)
+            return redirect('conversation_detail', user_id=other.id)
+
+    messages = Message.objects.filter(
+        (Q(sender=user) & Q(recipient=other)) | (Q(sender=other) & Q(recipient=user))
+    ).order_by('timestamp')
+
+    return render(request, 'listings/conversation_detail.html', {
+        'messages': messages,
+        'other': other,
+        'listing': messages.first().listing if messages.exists() else None,
+    })
+
+
+@login_required
+def delete_conversation(request, user_id):
+    other = get_object_or_404(User, id=user_id)
+    Message.objects.filter(
+        (Q(sender=request.user) & Q(recipient=other)) |
+        (Q(sender=other) & Q(recipient=request.user))
+    ).delete()
+    return redirect('conversations_list')
