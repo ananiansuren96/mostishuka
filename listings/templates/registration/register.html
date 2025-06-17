@@ -6,13 +6,13 @@
 </head>
 <body>
   <div class="container mt-5">
-    <h2>Регистрация</h2>
+    <h2>Գրանցում</h2>
     <form method="post">
       {% csrf_token %}
       {{ form.as_p }}
-      <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+      <button type="submit" class="btn btn-primary">Գրանցվել</button>
     </form>
-    <p class="mt-3">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+    <p class="mt-3">Уже есть аккаунт? <a href="{% url 'login' %}">Մուտք</a></p>
   </div>
 </body>
 </html>

@@ -1,28 +1,100 @@
 <!DOCTYPE html>
+{% load static %}
+
 <html>
 <head>
-  <title>{{ category.name }}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <title>BAGATASHEN_MARKET</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    
+    .btn-round {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .card a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .card a:hover {
+      color: #0d6efd;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="container mt-5">
-    <h2>Категория: {{ category.name }}</h2>
+   <header class="d-flex justify-content-between align-items-center flex-wrap p-3 bg-light">
+  <div class="mb-2 mb-md-0">
+    <strong>BAGRATASHEN_MARKET</strong>
+  </div>
+
+  <div class="d-flex align-items-center flex-wrap gap-2">
+    {% if user.is_authenticated %}
+      <span class="me-2">Ողջույն՝ {{ user.username }}!</span>
+
+      <form method="post" action="{% url 'logout' %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-secondary btn-sm">ԵԼՔ</button>
+      </form>
+
+      <a href="{% url 'add_listing' %}" class="btn btn-success btn-sm ms-2">
+        Տեղադրել Հայտարարություն
+      </a>
+    {% else %}
+      <a href="{% url 'login' %}" class="btn btn-primary ">ՄՈՒՏՔ</a>
+      <a href="{% url 'register' %}" class="btn btn-secondary btn-sm">ԳՐԱՆՑՎԵԼ</a>
+    {% endif %}
+  </div>
+</header>
+
+<section class="bg-warning text-center py-3">
+  {% if user.is_authenticated %}
+    <h1 class="fs-4 mb-0">{{ category.name }}</h1>
+    
+  {% else %}
+    <h1 class="fs-4 mb-0">{{ category.name }}</h1>
+
+  {% endif %}
+</section>
+
+ 
+  <div class="container mt-3">
+    <div class="category-scroll mb-4">
+  {% for category in categories %}
+    <div class="category-item text-center">
+  <a href="{% url 'category_list' category.slug %}" class="category-circle" style="background-image: url('{{ category.icon.url }}');"></a>
+  <div class="category-name">{{ category.name }}</div>
+</div>
+  {% endfor %}
+</div>
+  
+    <h2>Թարմ</h2>
     <div class="row">
       {% for listing in listings %}
-      <div class="col-md-3">
-        <div class="card mb-4">
-          {% if listing.image %}
-            <img src="{{ listing.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">
-          {% else %}
-            <div class="p-5 text-center bg-light">Нет фото</div>
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title">{{ listing.title }}</h5>
-            <p class="card-text">{{ listing.price }} драм</p>
-            <p class="text-muted small">{{ listing.created_at|date:"d.m.Y" }}</p>
+        <div class="col-md-3 mb-4">
+          <div class="card h-100">
+            <a href="{% url 'listing_detail' listing.id %}">
+              {% if listing.image %}
+                <img src="{{ listing.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">
+              {% else %}
+                <div class="p-5 text-center bg-light">Нет фото</div>
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title">{{ listing.title }}</h5>
+                <p class="card-text">{{ listing.price }} драм</p>
+                <p class="text-muted small">{{ listing.created_at|date:"d.m.Y" }}</p>
+              </div>
+            </a>
           </div>
         </div>
-      </div>
       {% endfor %}
     </div>
   </div>
