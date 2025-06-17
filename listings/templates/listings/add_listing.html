@@ -56,23 +56,23 @@
   </div>
 </header>
   <div class="container mt-5">
-    <h2>Добавить объявление</h2>
+    <h2>Ավելացնել հայտարարություն</h2>
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="mb-3">
-        <label>Заголовок</label>
+        <label>Վերնագիր</label>
         <input type="text" name="title" class="form-control" required>
       </div>
       <div class="mb-3">
-        <label>Описание</label>
+        <label>Մանրամասներ</label>
         <textarea name="description" class="form-control" required></textarea>
       </div>
       <div class="mb-3">
-        <label>Цена</label>
+        <label>Գին</label>
         <input type="number" step="0.01" name="price" class="form-control" required>
       </div>
       <div class="mb-3">
-        <label>Категория</label>
+        <label>Տեսակ</label>
         <select name="category" class="form-control" required>
           {% for category in categories %}
             <option value="{{ category.id }}">{{ category.name }}</option>
@@ -80,14 +80,14 @@
         </select>
       </div>
       <div class="mb-3">
-        <label>Телефон</label>
+        <label>Հեռեխոսահամար</label>
         <input type="text" name="contact_phone" class="form-control" required>
       </div>
       <div class="mb-3">
-        <label>Изображение</label>
+        <label>Նկար</label>
         <input type="file" name="image" class="form-control">
       </div>
-      <button type="submit" class="btn btn-primary">Опубликовать</button>
+      <button type="submit" class="btn btn-primary">ՀՐԱՊԱՐԱԿԵԼ</button>
     </form>
   </div>
 </body>
