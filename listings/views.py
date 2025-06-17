@@ -11,12 +11,13 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 
 from .models import Listing, Category, Message
+from .forms import ListingForm  # Форма для добавления/редактирования объявлений
 
 
 def home(request):
     all_listings = Listing.objects.all().order_by('-created_at')
     paginator = Paginator(all_listings, 20)
-    page_obj = paginator.get_page(1)  # первая страница
+    page_obj = paginator.get_page(request.GET.get('page', 1))
 
     categories = Category.objects.all()
     return render(request, 'listings/home.html', {'page_obj': page_obj, 'categories': categories})
@@ -41,32 +42,20 @@ def listings_ajax(request):
     return JsonResponse(data)
 
 
+@login_required
 def add_listing(request):
-    if not request.user.is_authenticated:
-        return redirect('login')  # или куда у тебя логин
-
     if request.method == 'POST':
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        price = request.POST.get('price')
-        image = request.FILES.get('image')
-        category_id = request.POST.get('category')
-        contact_phone = request.POST.get('contact_phone')
-
-        category = get_object_or_404(Category, id=category_id)
-        Listing.objects.create(
-            title=title,
-            description=description,
-            price=price,
-            image=image,
-            category=category,
-            contact_phone=contact_phone,
-            user=request.user  # если есть поле user в модели
-        )
-        return redirect('home')
+        form = ListingForm(request.POST, request.FILES)
+        if form.is_valid():
+            listing = form.save(commit=False)
+            listing.user = request.user
+            listing.save()
+            return redirect('home')
+    else:
+        form = ListingForm()
 
     categories = Category.objects.all()
-    return render(request, 'listings/add_listing.html', {'categories': categories})
+    return render(request, 'listings/add_listing.html', {'form': form, 'categories': categories})
 
 
 def listing_detail(request, listing_id):
@@ -100,10 +89,7 @@ def conversations_list(request):
 
     interlocutors = {}
     for msg in conversations:
-        if msg.sender == user:
-            other = msg.recipient
-        else:
-            other = msg.sender
+        other = msg.recipient if msg.sender == user else msg.sender
         if other.id not in interlocutors:
             interlocutors[other.id] = msg
 
@@ -144,3 +130,32 @@ def delete_conversation(request, user_id):
         (Q(sender=other) & Q(recipient=request.user))
     ).delete()
     return redirect('conversations_list')
+
+
+@login_required
+def user_listings(request):
+    listings = Listing.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'listings/user_listings.html', {'listings': listings})
+
+
+@login_required
+def edit_listing(request, listing_id):
+    listing = get_object_or_404(Listing, id=listing_id, user=request.user)
+
+    if request.method == 'POST':
+        form = ListingForm(request.POST, request.FILES, instance=listing)
+        if form.is_valid():
+            form.save()
+            return redirect('user_listings')
+    else:
+        form = ListingForm(instance=listing)
+
+    return render(request, 'listings/edit_listing.html', {'form': form})
+
+@login_required
+def delete_listing(request, listing_id):
+    listing = get_object_or_404(Listing, id=listing_id, user=request.user)
+    if request.method == 'POST':
+        listing.delete()
+        return redirect('user_listings')
+    return render(request, 'listings/delete_listing_confirm.html', {'listing': listing})

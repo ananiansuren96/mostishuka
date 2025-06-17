@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+  <meta charset="UTF-8">
+  <title>Իմ Հայտարարությունները</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<header class="d-flex justify-content-between align-items-center flex-wrap p-3 bg-light">
+  <div class="mb-2 mb-md-0">
+    <a href="{% url 'home' %}"><img src="{% static 'css/logo.png' %}" alt="Logo" style="height: 60px;"></a>
+  </div>
+
+  <div class="d-flex align-items-center flex-wrap gap-2">
+    {% if user.is_authenticated %}
+      <span class="me-2">Ողջույն՝ {{ user.username }}!</span>
+      <form method="post" action="{% url 'logout' %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-secondary btn-sm">ԵԼՔ</button>
+      </form>
+      <a href="{% url 'add_listing' %}" class="btn btn-success btn-sm ms-2">Տեղադրել Հայտարարություն</a>
+      <a href="{% url 'conversations_list' %}" class="btn btn-outline-secondary ms-2">Նամակներ</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="btn btn-primary">ՄՈՒՏՔ</a>
+      <a href="{% url 'register' %}" class="btn btn-secondary btn-sm">ԳՐԱՆՑՎԵԼ</a>
+    {% endif %}
+  </div>
+</header>
+
+<section class="bg-warning text-center py-3">
+  <h1 class="fs-4 mb-0">Իմ Հայտարարությունները</h1>
+</section>
+
+<style>
+  .card {
+    height: 100%;
+    max-height: 420px;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-img-top {
+    height: 180px;
+    object-fit: cover;
+  }
+
+  .card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .card-footer {
+    background-color: transparent;
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  .card-text {
+    font-size: 1rem;
+    color: #333;
+  }
+</style>
+
+<div class="container mt-4">
+  <h2 class="mb-4">Իմ Հայտարարությունները</h2>
+  <div class="row">
+    {% for listing in listings %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 d-flex flex-column">
+          <a href="{% url 'listing_detail' listing.id %}">
+            <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title }}">
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">{{ listing.title }}</h5>
+            <p class="card-text">{{ listing.description|truncatechars:100 }}</p>
+          </div>
+          <div class="card-footer d-flex justify-content-between">
+            <a href="{% url 'edit_listing' listing.id %}" class="btn btn-sm btn-outline-primary">Խմբագրել</a>
+            <form method="post" action="{% url 'delete_listing' listing.id %}" onsubmit="return confirm('Ջնջե՞լ այս հայտարարությունը։');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger">Ջնջել</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+</body>
+</html>

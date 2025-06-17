@@ -5,5 +5,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('listings.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('', include('listings.urls')),  # Все пути приложения здесь
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

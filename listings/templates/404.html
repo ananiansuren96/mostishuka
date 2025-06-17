@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+  <meta charset="UTF-8" />
+  <title>Էջը չի գտնվել — 404</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 100px;
+      color: #b00020; /* твой красный */
+      margin-bottom: 0;
+    }
+    h2 {
+      font-size: 28px;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+    a {
+      display: inline-block;
+      background-color: #146c43; /* твой зеленый фон */
+      color: white;
+      padding: 12px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(20, 108, 67, 0.4);
+      transition: background-color 0.3s ease;
+    }
+    a:hover {
+      background-color: #0f5637;
+      box-shadow: 0 6px 8px rgba(15, 86, 55, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <h1>404</h1>
+  <h2>Ներեցեք, էջը չի գտնվել</h2>
+  <p>Կրկին ստուգեք հղումը կամ վերադառնաք գլխավոր էջ</p>
+  <a href="{% url 'home' %}">Վերադառնալ գլխավոր էջ</a>
+</body>
+</html>

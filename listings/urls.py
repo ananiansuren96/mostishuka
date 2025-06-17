@@ -19,5 +19,8 @@ urlpatterns = [
     path('messages/', views.conversations_list, name='conversations_list'),            # Список всех переписок текущего пользователя
     path('messages/<int:user_id>/', views.conversation_detail, name='conversation_detail'),  # Чат с конкретным пользователем
     path('messages/delete-conversation/<int:user_id>/', views.delete_conversation, name='delete_conversation'),
+    path('my-listings/', views.user_listings, name='user_listings'),
+    path('listing/<int:listing_id>/edit/', views.edit_listing, name='edit_listing'),
+    path('listing/<int:listing_id>/delete/', views.delete_listing, name='delete_listing'),
 
 ]
