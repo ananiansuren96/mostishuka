@@ -1,10 +1,39 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 from .models import Listing, Category
 
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+
 def home(request):
-    listings = Listing.objects.all().order_by('-created_at')[:12]
+    all_listings = Listing.objects.all().order_by('-created_at')
+    paginator = Paginator(all_listings, 20)
+    page_obj = paginator.get_page(1)  # первая страница
+
     categories = Category.objects.all()
-    return render(request, 'listings/home.html', {'listings': listings, 'categories': categories})
+    return render(request, 'listings/home.html', {'page_obj': page_obj, 'categories': categories})
+
+
+def listings_ajax(request):
+    all_listings = Listing.objects.all().order_by('-created_at')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(all_listings, 20)
+
+    try:
+        listings_page = paginator.page(page)
+    except:
+        return JsonResponse({'listings_html': '', 'has_next': False})
+
+    listings_html = render_to_string('listings/listings_partial.html', {'listings': listings_page})
+
+    data = {
+        'listings_html': listings_html,
+        'has_next': listings_page.has_next()
+    }
+    return JsonResponse(data)
+
 
 def add_listing(request):
     if not request.user.is_authenticated:
@@ -33,9 +62,11 @@ def add_listing(request):
     categories = Category.objects.all()
     return render(request, 'listings/add_listing.html', {'categories': categories})
 
+
 def listing_detail(request, listing_id):
     listing = get_object_or_404(Listing, id=listing_id)
     return render(request, 'listings/detail.html', {'listing': listing})
+
 
 def category_list(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
@@ -43,9 +74,6 @@ def category_list(request, category_slug):
     categories = Category.objects.all()
     return render(request, 'listings/category.html', {'listings': listings, 'category': category, 'categories': categories})
 
-
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
 
 def register(request):
     if request.method == 'POST':
